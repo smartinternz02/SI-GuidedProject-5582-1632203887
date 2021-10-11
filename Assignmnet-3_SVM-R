@@ -1,0 +1,79 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Oct  9 22:03:46 2021
+
+@author: Logu
+"""
+
+import numpy as np
+import pandas as pd
+dataset=pd.read_csv(r'H:\My Drive\AI\Training\SmartBridge\Assignment\Asignment-3\50_Startups.csv')
+print(dataset.isnull())
+print(dataset.isnull().sum())
+dataset["Administration"].fillna(dataset["Administration"].mean(),inplace = True)
+
+
+dataset["Marketing Spend"].fillna(dataset["Marketing Spend"].mean(),inplace = True)
+print(dataset.isnull().sum())
+
+print(dataset['State'].unique())
+import seaborn as sns
+
+#Label encoding
+#from sklearn.preprocessing import LabelEncoder
+#le=LabelEncoder()
+##Label encoder is used when categorical feature has ranking else we can use onehotencoder
+#dataset["State"]=le.fit_transform(dataset["State"])
+#print("***After LabelEncoding***")
+#print(dataset.head(10))
+
+x=dataset.iloc[:,0:4].values
+y=dataset.iloc[:,4:5].values
+print("***After Spliting X and Y***")
+print(x)
+print(y)
+
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder
+ct = ColumnTransformer([("one",OneHotEncoder(),[3])],remainder = "passthrough")
+x_ct = ct.fit_transform(x)
+print("***After OneHotEncoder****")
+print("x_ct.shape:  ",x_ct.shape)
+
+from sklearn.preprocessing import StandardScaler
+sc=StandardScaler()
+x_tran=sc.fit_transform(x_ct)
+print("***After StandarScalar***")
+print(x_tran)
+
+
+from sklearn.model_selection import train_test_split
+x_train,x_test,y_train,y_test=train_test_split(x_tran,y,test_size=0.2,random_state=0)
+print(x_train.shape)
+print(y_train.shape)
+print(y_test.shape)
+print(x_test.shape)
+
+from sklearn.svm import SVR
+import numpy as np
+
+y_np = y_train.ravel()
+y_train_1 = np.array(y_np).astype(int)
+SVM_R=SVR(gamma='auto')
+SVM_R.fit(x_train,y_train_1)
+y_pred=SVM_R.predict(x_test)
+
+
+
+print("Y_pred.shape()",y_pred.shape)
+print("Y_test.shape()",y_test.shape)
+print(y_pred[0:10])
+print("----------")
+print(y_test[0:10])
+
+
+from sklearn.metrics import r2_score
+accuracy = r2_score(y_test,y_pred)
+print("Accuracy:",accuracy*100,"%")
+#knn_R=KNeighborsRegressor()
+#knn_R.fit(x_train,y_train)
